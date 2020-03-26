@@ -1,0 +1,27 @@
+#!/bin/bash
+exps=$(ls ./experiments)
+
+mkdir -p ./results
+
+for exp in $exps; do
+    exp=$(echo "$exp" | cut -d '.' -f1)
+
+    if [[ -f ./results/${exp}.log ]]; then
+        echo "$(date) experiment $exp exists, won't overwrite. delete first."
+        continue
+    fi
+
+    echo "$(date) start experiment $exp"
+
+    start=$(date +%s)
+    ./calcSMAPE $exp > ./results/${exp}.log 2> ./results/${exp}-error.log
+    end=$(date +%s)
+    duration=$(($end - $start))
+    echo "duration: $duration" >> ./results/${exp}.log
+   
+    mkdir -p ./results/${exp}
+    cp -r ./tmp ./results/${exp}
+    cp calcSMAPE.log ./results/${exp}/
+
+    echo "$(date) experiment $exp ended"
+done

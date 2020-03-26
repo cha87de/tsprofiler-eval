@@ -1,0 +1,44 @@
+#!/bin/bash
+#set -x
+
+results=$(cd ./results; ls *.log | grep -v "error")
+
+mkdir -p plots
+mkdir -p tmp
+
+for result in $results; do
+    exp=$(echo "$result" | cut -d '.' -f1)
+
+    file="./results/${exp}/calcSMAPE.log"
+    echo -ne "" > tmp/smape.csv
+    while IFS=$'\t' read -r counter predict actual diff sqsum frac sum ; do
+        if [[ "$counter" == "counter" ]] ; then
+            continue
+        fi
+        #echo "$counter ; $sum"
+        smape=$(echo "$sum / $counter * 100" | bc -l)
+        smape=$(printf "%.3f" $smape)
+        echo "$counter $smape" >> tmp/smape.csv
+    done < $file
+
+    echo "set terminal pdf size 4,2.4
+set output 'plots/${exp}.pdf'
+
+#x axis formatting
+set xlabel 'Time'
+set xdata time
+set timefmt \"%s\"
+set format x \"%H\"
+
+#y axis formatting
+set ylabel 'SMAPE [%]'
+
+# styles
+set style line 1 lt 1 lw 1 lc rgb \"#3a3a3a\"
+
+set autoscale
+
+plot \"tmp/smape.csv\" using 1:2 with lines ls 1 title 'SMAPE'" > tmp/smape.gnuplot
+    gnuplot tmp/smape.gnuplot
+
+done

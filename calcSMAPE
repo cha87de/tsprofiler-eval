@@ -1,0 +1,192 @@
+#!/bin/bash
+#set -x
+
+TEMPDIR="./tmp/"
+
+function createProfile(){
+    ./bin/csv2tsprofile \
+        --states=$states\
+		--buffersize=$buffersize\
+		--filterstddevs=$filterstddevs\
+		$fixedbound\
+		--fixedmin=$fixedmin\
+		--fixedmax=$fixedmax\
+		--periodsize=$periodsize\
+        --history=$history\
+        --phasechangelikeliness $phasechangelikeliness\
+        --out.phases $TEMPDIR/out.phases.log\
+        --out.states $TEMPDIR/out.states.log\
+        --out.history $TEMPDIR/out.history.json\
+        --output $TEMPDIR/out.profile.json\
+        $TEMPDIR/tmp-part.csv > $TEMPDIR/out.csv2tsprofile.log
+}
+
+function createPrediction(){
+    steps=$1
+    mode=$2
+    perioddepth=$3
+    response=$(./bin/tspredictor \
+        --profile $TEMPDIR/out.profile.json \
+        --history $TEMPDIR/out.history.json \
+        --steps $steps \
+        --mode $mode \
+        --periodDepth $perioddepth \
+        simulate 2>&1)
+    if [[ $? != 0 ]]; then
+        echo -ne "$response" >&2
+        return 1
+    fi
+    # skip first line (header)
+    predictionValue=$(echo "$response" |  tail -n +2)
+    echo -ne "$predictionValue"
+}
+
+function getActualValue(){
+    file=$1
+    lineNr=$2
+    nextValue=$(head -n $lineNr $file | tail -n -1)
+    result=""
+    nextValueByMetric=($(echo "$nextValue" | tr ',' ' '))
+    for value in "${nextValueByMetric[@]}"; do
+        valueCleaned=$(echo "$value" | cut -d'.' -f1)
+        if [[ ! -z $result ]]; then
+            result="$result "
+        fi
+        result="$result${valueCleaned}"
+    done
+    echo -ne "$result"    
+}
+
+function separateInputFile(){
+    file=$1
+    lineNr=$2
+    head -n $lineNr $file > $TEMPDIR/tmp-part.csv
+}
+
+function runCycle(){
+    file=$1
+    lineNr=$2
+    lineNrNext=$(($lineNr + 1))
+    steps=$3
+    mode=$4
+    perioddepth=$5
+
+    separateInputFile $file $lineNr
+    createProfile
+    predictedValues=$(createPrediction $steps $mode $perioddepth)
+    if [[ $? != 0 ]]; then
+        echo "failed to create prediction: $predictedValues" >&2
+        return 1
+    fi
+    if [[ -z $predictedValues ]]; then predictedValues="0"; fi
+
+    diffTotal=0
+    sqsumTotal=0
+    actualValues="("
+    predictedValuesStr="("
+    # for each predicted values
+    for predictedValue in $predictedValues; do
+        actualValue=$(getActualValue $file $lineNrNext)
+        if [[ $actualValues != "(" ]]; then
+            actualValues="$actualValues),("
+        fi
+        actualValues="$actualValues"$(echo "$actualValue"  | tr ' ' ',')
+
+        if [[ $predictedValuesStr != "(" ]]; then
+            predictedValuesStr="$predictedValuesStr),("
+        fi
+        predictedValuesStr="$predictedValuesStr$predictedValue"
+
+
+        # for each metric
+        actualValueMetrics=($(echo "$actualValue"))
+        predictedValueMetrics=($(echo "$predictedValue" | tr ',' ' '))
+        i=0
+        for prediction in "${predictedValueMetrics[@]}"; do
+            actual=${actualValueMetrics[i]}
+            i=$((i+1))
+
+            diff=$(($prediction - $actual))
+            diff=${diff#-} # remove negativ sign
+            if [[ -z $diff ]]; then diff="0"; fi
+            sqsum=$(( ($prediction + $actual) * ($prediction + $actual) ))
+
+            # sum up over all prediction steps
+            diffTotal=$(( $diffTotal + $diff ))
+            sqsumTotal=$(( $sqsumTotal + $sqsum ))
+        done
+
+        lineNrNext=$(($lineNrNext + 1))
+    done
+
+    #predictedValuesStr=$(echo $predictedValues | tr ' ' ',')
+    #actualValuesStr=$(echo $actualValues | tr ' ' ',')
+    echo -e "$predictedValuesStr) $actualValues) $diffTotal $sqsumTotal"
+}
+
+function main(){
+    experiment=$1
+    source experiments/${experiment}.sh
+
+    mkdir -p $TEMPDIR
+
+    echo "processing file $file"
+
+    # define lines to handle
+    startLine=1    
+    endLine=$(cat $file | wc -l)
+    # overwrite lines when provided
+    if [[ ! -z $2 && ! -z $3 ]]; then
+        startLine=$2
+        endLine=$3
+        echo "limiting lines from $startLine to $endLine"
+    fi
+
+    counter=0
+    sum=0
+    echo -e "counter\tpredict\tactual\tdiff\tsqsum\tfrac\tsum" > calcSMAPE.log
+    for lineNr in $(seq $startLine $endLine); do
+        #echo "$lineNr / $endLine * 100" | bc -l
+
+        response=$(runCycle $file $lineNr $predictionstep $predictionmode $perioddepth)
+        if [[ $? != 0 ]]; then
+            echo "error in runCycle for line $lineNr. skipping." >&2
+            continue
+        fi
+        results=($response)
+        #echo $results
+        predictedValue=${results[0]}
+        actualValue=${results[1]}
+        diff=${results[2]}
+        sqsum=${results[3]}
+        counter=$(($counter + 1))
+        if [[ $sqsum == "0" ]]; then
+            frac=0
+        else
+            frac=$(echo "$diff / $sqsum" | bc -l)
+            if [[ $? != 0 ]]; then
+                echo "error calculating frac for $lineNr. skipping." >&2
+                continue
+            fi
+        fi
+        sum=$(echo "$sum + $frac" | bc -l)
+        if [[ $? != 0 ]]; then
+            echo "error calculating sum for $lineNr. skipping." >&2
+            continue
+        fi        
+        
+        echo -e "$counter\t$predictedValue\t$actualValue\t$diff\t$sqsum\t$frac\t$sum" >> calcSMAPE.log
+    done
+
+    smape=$(echo "$sum / $counter * 100" | bc -l)
+    smape=$(printf "%.3f" $smape)
+    echo "smape: $smape%"
+}
+
+
+if [[ ${BASH_SOURCE[0]} != $0 ]]; then
+	export -f main runCycle
+else
+	main "${@}"
+	exit $?
+fi

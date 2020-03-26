@@ -1,0 +1,13 @@
+#!/bin/bash
+
+function main(){
+    ./createExperiments
+    ./runExperiments
+    ./extractResults > ./results/summary.csv
+}
+
+if [[ "$1" == "" ]]; then
+    main
+else
+    exec "$@"
+fi
