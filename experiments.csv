@@ -1,18 +1,18 @@
-Time Series Input,,Profliing,,,,,Prediction,,,
+Time Series Input,,Profiling,,,,,Prediction,,,
 Use Case,Metrics,States,Buffersize,History,PeriodSize,Phase Change Likeliness,Mode,PeriodDepth,Steps,ID
-#BASIC EXPERIMENTS
-hpc,multi,10,1,1,,0,0 - roottx,0,1,10
-hpc,single,10,1,1,,0,0 - roottx,0,1,11
-uninet,single,10,1,1,,0,0 - roottx,0,1,12
-hpc,multi,10,1,1,,0.5,1 - phases,0,1,20
-hpc,single,10,1,1,,0.5,1 - phases,0,1,21
-uninet,single,10,1,1,,0.5,1 - phases,0,1,22
-hpc,multi,10,1,1,100 1,0,2 - periods,0,1,30
-hpc,single,10,1,1,100 1,0,2 - periods,0,1,31
-uninet,single,10,1,1,100 1,0,2 - periods,0,1,32
-#INTENSE ROOTTX EXPERIMENTS
-...,,,,,,,,,,
-#INTENSE PHASES EXPERIMENTS
-...,,,,,,,,,,
-#INTENSE PERIODS EXPERIMENTS
-...,,,,,,,,,,
+BASIC EXPERIMENTS,,,,,,,,,,
+hpc,multi,10,1,1,,0,0 - roottx,0,1,010
+hpc,single,10,1,1,,0,0 - roottx,0,1,011
+uninet,single,10,1,1,,0,0 - roottx,0,1,012
+hpc,multi,10,1,1,,0.5,1 - phases,0,1,020
+hpc,single,10,1,1,,0.5,1 - phases,0,1,021
+uninet,single,10,1,1,,0.5,1 - phases,0,1,022
+hpc,multi,10,1,1,100 1,0,2 - periods,0,1,030
+hpc,single,10,1,1,100 1,0,2 - periods,0,1,031
+uninet,single,10,1,1,100 1,0,2 - periods,0,1,032
+INTENSE ROOTTX EXPERIMENTS,,,,,,,,,,
+tbd,,,,,,,,,,
+INTENSE PHASES EXPERIMENTS,,,,,,,,,,
+tbd,,,,,,,,,,
+INTENSE PERIODS EXPERIMENTS,,,,,,,,,,
+tbd,,,,,,,,,,
