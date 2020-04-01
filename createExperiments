@@ -10,13 +10,14 @@ fixedmax=100
 periodsize=\$PERIODSIZE
 history=\$HISTORY
 phasechangelikeliness=\$PHASELIKE
+phasechangehistory=\$PHASEHISTORY
 predictionmode=\$PREDICTIONMODE
 predictionstep=\$PREDICTIONSTEP
 perioddepth=\$PERIODDEPTH"
 
 mkdir -p ./experiments/
 
-while IFS=, read -r usecase metrics states buffersize history periodsize phasechangelikeliness mode perioddepth steps expID
+while IFS=, read -r usecase metrics states buffersize history periodsize phasechangelikeliness phasechangehistory mode perioddepth steps expID
 do
 
    if [[ "$usecase" != "hpc" && "$usecase" != "uninet" ]]; then
@@ -30,12 +31,13 @@ do
    export PERIODSIZE=${periodsize// /,}
    export HISTORY=$history
    export PHASELIKE=$phasechangelikeliness
+   export PHASEHISTORY=$phasechangehistory
    export PREDICTIONMODE=${mode:0:1}
    export PREDICTIONSTEP=$steps
    export PERIODDEPTH=$perioddepth
    export ID=${expID:0:3}
 
-    expFile="${ID}_${usecase}-${metrics}-s${states}-b${buffersize}-h${history}-ps${periodsize// /-}-pcl${phasechangelikeliness//./}-pm${mode:0:1}-pd${perioddepth}-ps${steps:0:1}.sh"
+    expFile="${ID}_${usecase}-${metrics}-s${states}-b${buffersize}-h${history}-ps${periodsize// /-}-pcl${phasechangelikeliness//./}-pch${phasechangehistory}-pm${mode:0:1}-pd${perioddepth}-ps${steps:0:1}.sh"
     #echo "$expFile"
     echo -ne "$template" | envsubst "$(env | sed -e 's/=.*//' -e 's/^/\$/g')" | tee ./experiments/${expFile} > /dev/null
     #echo ""
