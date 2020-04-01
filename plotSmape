@@ -25,10 +25,7 @@ for result in $results; do
 set output 'plots/${exp}.pdf'
 
 #x axis formatting
-set xlabel 'Time'
-set xdata time
-set timefmt \"%s\"
-set format x \"%H\"
+set xlabel 'Time Steps'
 
 #y axis formatting
 set ylabel 'SMAPE [%]'
