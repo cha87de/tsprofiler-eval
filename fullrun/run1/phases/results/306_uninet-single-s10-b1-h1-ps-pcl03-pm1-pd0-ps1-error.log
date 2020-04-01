@@ -1,0 +1,13 @@
+panic: runtime error: index out of range [452] with length 452
+
+goroutine 1 [running]:
+github.com/cha87de/tsprofiler/profiler/phase.(*Phase).GetPhasesTx(0xc0000aa220, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, ...)
+	/home/travis/gopath/src/github.com/cha87de/tsprofiler/profiler/phase/phase.go:174 +0x2fd
+github.com/cha87de/tsprofiler/profiler.(*Profiler).generateProfile(0xc0000aa000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, ...)
+	/home/travis/gopath/src/github.com/cha87de/tsprofiler/profiler/profiler.go:155 +0x167
+github.com/cha87de/tsprofiler/profiler.(*Profiler).Get(0xc0000aa000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, ...)
+	/home/travis/gopath/src/github.com/cha87de/tsprofiler/profiler/profiler.go:69 +0x5d
+main.outputProfile()
+	/home/travis/gopath/src/github.com/cha87de/tsprofiler/cmd/csv2tsprofile/output.go:50 +0x4a
+main.main()
+	/home/travis/gopath/src/github.com/cha87de/tsprofiler/cmd/csv2tsprofile/main.go:83 +0xd7
