@@ -1,0 +1,30 @@
+#!/bin/bash
+#set -x
+
+results=$(cd ./results; ls *.log | grep -v "error")
+#results=$(cd ./results; ls *.log | grep -v "error" | grep "156")
+
+mkdir -p plots
+mkdir -p tmp
+
+for result in $results; do
+    exp=$(echo "$result" | cut -d '.' -f1)
+    file="./results/${exp}/calcSMAPE.log"
+    echo "set terminal pdf size 4,2.4
+set output 'plots/${exp}-diff.pdf'
+
+#x axis formatting
+set xlabel 'Time Steps'
+
+#y axis formatting
+set ylabel 'Diff Util [%]'
+
+# styles
+set style line 1 lt 1 lw 1 lc rgb \"#3a3a3a\"
+
+set autoscale
+
+plot \"${file}\" using 1:4 with lines ls 1 title 'diff'" > tmp/diff.gnuplot
+    gnuplot tmp/diff.gnuplot
+
+done
