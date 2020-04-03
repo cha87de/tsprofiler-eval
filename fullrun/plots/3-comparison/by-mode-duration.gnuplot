@@ -13,8 +13,11 @@ set ylabel 'Duration [s]'
 
 # box settings
 set boxwidth 0.24
-set yrange [0:900]
+set yrange [0:360]
 set xrange [0.5:4]
+
+#set yrange [0:130000]
+#set logscale y 2
 
 # styles
 set style line 1 lc rgb 'gray10' lt 1 lw 1
@@ -26,5 +29,4 @@ set style fill solid 0.2 border rgb 'gray30'
 
 plot \
     "by-mode-duration-hpc.csv" using 1:3:4:xtic(2) with boxerrorbars ls 1 title 'HPC', \
-    "by-mode-duration-hpcmulti.csv" using 1:3:4:xtic(2) with boxerrorbars ls 3 title 'HPC Multi', \
     "by-mode-duration-uninet.csv" using 1:3:4 with boxerrorbars ls 2 title 'Cloud'

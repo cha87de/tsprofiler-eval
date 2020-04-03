@@ -26,5 +26,4 @@ set style fill solid 0.2 border rgb 'gray30'
 
 plot \
     "by-mode-smape-hpc.csv" using 1:3:4:xtic(2) with boxerrorbars ls 1 title 'HPC', \
-    "by-mode-smape-hpcmulti.csv" using 1:3:4:xtic(2) with boxerrorbars ls 3 title 'HPC Multi', \
     "by-mode-smape-uninet.csv" using 1:3:4 with boxerrorbars ls 2 title 'Cloud'

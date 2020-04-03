@@ -12,13 +12,13 @@ set ylabel 'SMAPE [%]'
 
 # styles
 set style line 1 \
-    linecolor rgb '#606060' \
+    linecolor rgb '#303030' \
     linetype 1 linewidth 1.0 \
-    pointtype 6 pointsize 0.5
+    pointtype 6 pointsize 1.0
 set style line 2 \
-    linecolor rgb '#606060' \
+    linecolor rgb '#303030' \
     linetype 1 linewidth 1.0 \
-    pointtype 4 pointsize 0.5
+    pointtype 25 pointsize 1.0
 set style line 3 \
     linecolor rgb '#A0A0A0' \
     linetype 1 linewidth 1
