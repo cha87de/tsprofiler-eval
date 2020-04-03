@@ -1,12 +1,19 @@
 #!/bin/bash
 results=$(cd ./results; ls *.log | grep -v "error")
 
-echo "exp,smape,duration"
+echo "exp,smape,avgdiff,duration"
 for result in $results; do
     exp=$(echo "$result" | cut -d '.' -f1)
     
     smape=$(cat ./results/${exp}.log | grep "smape" | cut -d':' -f2)
     duration=$(cat ./results/${exp}.log | grep "duration" | cut -d':' -f2)
 
-    echo "${exp},${smape},${duration}"
+    # calculate avg diff
+    file="./results/${exp}/calcSMAPE.log"
+    diffsum=$(cat $file | grep -v "counter" | cut -d$'\t' -f4 | paste -sd+  | bc)
+    diffcount=$(cat $file | grep -v "counter" | wc -l)
+    avgdiff=$(echo "$diffsum/$diffcount" | bc -l)
+    #echo -en "${exp}\t${i}\t${diffsum}\t${avgdiff}\n"
+
+    echo "${exp},${smape},${avgdiff},${duration}"
 done
