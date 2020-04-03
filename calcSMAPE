@@ -15,6 +15,7 @@ function createProfile(){
         --history=$history\
         --phasechangelikeliness $phasechangelikeliness\
         --phasechangehistory $phasechangehistory\
+        --phasechangehistoryfadeout\
         --out.phases $TEMPDIR/out.phases.log\
         --out.states $TEMPDIR/out.states.log\
         --out.history $TEMPDIR/out.history.json\
